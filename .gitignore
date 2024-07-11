@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+/shelf/
+/workspace.xml
+/.idea/
 
 # C extensions
 *.so
