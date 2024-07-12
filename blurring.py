@@ -9,7 +9,7 @@ def blur(image: np.ndarray, points: np.ndarray) -> np.ndarray:
     """
     Blurs the license plate using the given points.
     :param image: The image to blur.
-    :param points: The points to blur.
+    :param points: The normalized points of the license plate.
     :return: The blurred image.
     """
     # Extract the license plate

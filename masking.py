@@ -6,14 +6,16 @@ def mask(image: np.ndarray, points: np.ndarray, cover: np.ndarray) -> np.ndarray
     """
     Cover the license plate with the cover image, using homography of points
     :param image: Image to be covered
-    :param points: Points of the license plate
+    :param points: Normalized Points of the license plate
     :param cover: Cover image
     :return: Covered image
     """
+    points_pixel = points * np.array([image.shape[1], image.shape[0]])
+
     width, height = cover.shape[1], cover.shape[0]
     # Find homography matrix
     homography_matrix, _ = cv2.findHomography(
-        np.array([(0, 0), (width, 0), (width, height), (0, height)], dtype=np.float32), points)
+        np.array([(0, 0), (width, 0), (width, height), (0, height)], dtype=np.float32), points_pixel)
     # Warp the cover image
     warped_cover = cv2.warpPerspective(cover, homography_matrix, (image.shape[1], image.shape[0]))
     # Create a mask for the cover image

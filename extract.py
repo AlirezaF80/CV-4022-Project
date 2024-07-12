@@ -6,7 +6,7 @@ def extract(image: np.ndarray, points: np.ndarray) -> np.ndarray:
     """
     Extract the license plate from the image using homography of points
     :param image: Image to be extracted
-    :param points: Points of the license plate
+    :param points: Normalized Points of the license plate
     :return: Extracted image with aspect ratio of 4.5
     """
     points_pixel = points * np.array([image.shape[1], image.shape[0]])
