@@ -1,4 +1,4 @@
-# License Plate Recognition Project
+# CV 4022 - Automatic License Plate Recognition Project
 
 This project is part of the Fundamentals of Computer Vision course at KNTU, Spring 2024. The goal is to develop a Convolutional Neural Network (CNN)-based system for detecting and extracting data from Iranian license plates.
 
