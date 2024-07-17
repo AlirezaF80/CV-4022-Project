@@ -1,9 +1,9 @@
 import os
-
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 
-input_shape = (224, 224, 3)
+input_shape = (256, 256, 3)
 
 
 def augment(image: np.ndarray, points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -48,6 +48,10 @@ def augment(image: np.ndarray, points: np.ndarray) -> tuple[np.ndarray, np.ndarr
     aug_points[:, 0] /= aug_image.shape[1]
     aug_points[:, 1] /= aug_image.shape[0]
 
+    # Crop to square around points
+    x1, x2, y1, y2 = get_square_around_points(aug_image, aug_points)
+    aug_image, aug_points = crop_image(aug_image, aug_points, x1, x2, y1, y2)
+
     # Contrast adjustments
     alpha = np.random.uniform(0.8, 1.2)  # contrast control
     beta = np.random.uniform(-20, 20)  # brightness control
@@ -60,15 +64,7 @@ def augment(image: np.ndarray, points: np.ndarray) -> tuple[np.ndarray, np.ndarr
     return aug_image, aug_points
 
 
-def crop_image(img, points, x1, x2, y1, y2):
-    crop_img = img[y1:y2, x1:x2].copy()
-    cropped_points = points.copy()
-    cropped_points[:, 0] = (points[:, 0] * img.shape[1] - x1) / (x2 - x1)
-    cropped_points[:, 1] = (points[:, 1] * img.shape[0] - y1) / (y2 - y1)
-    return crop_img, cropped_points
-
-
-def resize(image: np.ndarray, points: np.ndarray, target_size=input_shape[0]) -> tuple[np.ndarray, np.ndarray]:
+def get_square_around_points(image, points):
     width, height = image.shape[1], image.shape[0]
     square_size = min(width, height)
     aspect_ratio = width / height
@@ -97,11 +93,20 @@ def resize(image: np.ndarray, points: np.ndarray, target_size=input_shape[0]) ->
             crop_y1 = height - square_size
         elif crop_y1 < 0:
             crop_y1 = 0
-
     crop_x1, crop_y1 = int(crop_x1), int(crop_y1)
     crop_x_width, crop_y_width = int(crop_x_width), int(crop_y_width)
+    return crop_x1, crop_x1 + crop_x_width, crop_y1, crop_y1 + crop_y_width
 
-    image, points = crop_image(image, points, crop_x1, crop_x1 + crop_x_width, crop_y1, crop_y1 + crop_y_width)
+
+def crop_image(img, points, x1, x2, y1, y2):
+    crop_img = img[y1:y2, x1:x2].copy()
+    cropped_points = points.copy()
+    cropped_points[:, 0] = (points[:, 0] * img.shape[1] - x1) / (x2 - x1)
+    cropped_points[:, 1] = (points[:, 1] * img.shape[0] - y1) / (y2 - y1)
+    return crop_img, cropped_points
+
+
+def resize(image: np.ndarray, points: np.ndarray, target_size=input_shape[0]) -> tuple[np.ndarray, np.ndarray]:
     image = cv2.resize(image, (target_size, target_size))
     return image, points
 
@@ -147,5 +152,6 @@ def load(dir_name: str, augment_prob=0.2) -> tuple[np.ndarray, np.ndarray]:
 
     # Normalize images
     images = np.clip(images.astype(np.float32) / 255, 0, 1)
+    labels = labels.reshape(-1, 8)
 
     return images, labels
